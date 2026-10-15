@@ -5,13 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Proyecto RXI</title>
     <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('hdri-environment', {
+        schema: {
+          src: { type: 'string', default: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr' }
+        },
+
+        init: async function () {
+          try {
+            const { HDRLoader } = await import('https://esm.sh/three@0.184.0/examples/jsm/loaders/HDRLoader.js');
+            const hdrTexture = await new HDRLoader().loadAsync(this.data.src);
+            const scene = this.el.object3D;
+            const renderer = this.el.renderer;
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+
+            hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
+            this.environment = pmremGenerator.fromEquirectangular(hdrTexture);
+            scene.environment = this.environment.texture;
+            scene.background = hdrTexture;
+            pmremGenerator.dispose();
+          } catch (error) {
+            console.error('No se pudo cargar el entorno HDRI:', error);
+          }
+        },
+
+        remove: function () {
+          if (this.environment) this.environment.dispose();
+        }
+      });
+    </script>
   </head>
   <body>
-    <a-scene>
-      <a-box position="-1 0.5 -3" color="#26A9CB"></a-box>
-      <a-sphere position="0 1.25 -5" radius="1.25"></a-sphere>
-      <a-plane rotation="-90 0 0" width="8" height="8"></a-plane>
-      <a-sky color="#222D62"></a-sky>
+    <a-scene hdri-environment shadow="type: pcf">
+      <!-- Iluminación de Estudio (Esquema de 3 Puntos + Ambiente) -->
+      <!-- 1. Luz Ambiente tenue para matizar sombras -->
+      <a-entity light="type: ambient; color: #ffffff; intensity: 0.4"></a-entity>
+
+      <!-- 2. Luz Principal (Key Light) con sombras suaves -->
+      <a-entity light="type: directional;
+                       color: #fff9ea;
+                       intensity: 0.85;
+                       castShadow: true;
+                       shadowMapWidth: 2048;
+                       shadowMapHeight: 2048;
+                       shadowBias: 0.0000;
+                       shadowCameraLeft: -5;
+                       shadowCameraRight: 5;
+                       shadowCameraTop: 5;
+                       shadowCameraBottom: -5"
+                position="3 5 2">
+      </a-entity>
+
+      <!-- 3. Luz de Relleno (Fill Light) para aclarar sombras duras -->
+      <a-entity light="type: directional;
+                       color: #dbeaff;
+                       intensity: 0.4;
+                       castShadow: false"
+                position="-4 3 2">
+      </a-entity>
+
+      <!-- 4. Contraluz / Luz de Borde (Rim / Back Light) para separar los objetos del fondo -->
+      <a-entity light="type: directional;
+                       color: #ffffff;
+                       intensity: 0.5;
+                       castShadow: false"
+                position="0 4 -8">
+      </a-entity>
+
+      <!-- Objetos de la escena con soporte de sombras -->
+      <a-box position="-1 0.5 -3"
+             color="lightcoral"
+             roughness="0.4"
+             shadow="cast: true; receive: true">
+      </a-box>
+
+      <a-sphere position="0 1.25 -5"
+                radius="1.25"
+                color="lightblue"
+                roughness="0.25"
+                metalness="0.5"
+                shadow="cast: true; receive: true">
+      </a-sphere>
+
+      <!-- Suelo de estudio infinito / plano -->
+      <a-plane rotation="-90 0 0"
+               width="200"
+               height="200"
+               color="#282a32"
+               roughness="1"
+               shadow="receive: true">
+      </a-plane>
+
     </a-scene>
   </body>
 </html>

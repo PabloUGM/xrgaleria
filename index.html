@@ -5,42 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Proyecto AR clases</title>
     <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
-    <script>
-      AFRAME.registerComponent('hdri-environment', {
-        schema: {
-          src: { type: 'string', default: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr' }
-        },
-
-        init: async function () {
-          try {
-            const { HDRLoader } = await import('https://esm.sh/three@0.184.0/examples/jsm/loaders/HDRLoader.js');
-            const hdrTexture = await new HDRLoader().loadAsync(this.data.src);
-            const scene = this.el.object3D;
-            const renderer = this.el.renderer;
-            const pmremGenerator = new THREE.PMREMGenerator(renderer);
-
-            hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
-            this.environment = pmremGenerator.fromEquirectangular(hdrTexture);
-            scene.environment = this.environment.texture;
-            scene.background = hdrTexture;
-            pmremGenerator.dispose();
-          } catch (error) {
-            console.error('No se pudo cargar el entorno HDRI:', error);
-          }
-        },
-
-        remove: function () {
-          if (this.environment) this.environment.dispose();
-        }
-      });
-    </script>
   </head>
   <body>
-    <a-scene>
-      <a-box position="-1 0.5 -3" color="#26A9CB"></a-box>
-      <a-sphere position="0 1.25 -5" radius="1.25"></a-sphere>
-      <a-plane rotation="-90 0 0" width="8" height="8"></a-plane>
-      <a-sky color="#222D62"></a-sky>
+    <a-scene stats shadow="type: pcfsoft">
+      <a-assets>
+        <a-asset-item id="silla" src="assets/perso.glb"    ></a-asset-item>
+
+      </a-assets>
+      <a-entity gltf-model="#silla" position="0 0 -2" scale="1 1 1" shadow="cast: true" animation__click="property: rotation;
+from: 0 0 0; to: 0 360 0;
+dur: 1000; startEvents: click" ></a-entity>
+<a-box position="-1 0.5 -3" color="#212220"
+animation__click="property: rotation;
+from: 0 0 0; to: 0 360 0;
+dur: 1000; startEvents: click">
+</a-box>
+<a-text value="Abre la caja" position="-2 2 -4"
+align="center" width="4" color="#222D62"></a-text>
+      <a-light type="directional" position="2 4 1" color="#ffffff" intensity="2.8" shadow="cast: true; bias: -0.0001; normalBias: 0.02"></a-light>
+      <a-light type="point" position="-2 2 1" color="#cfe3ff" intensity="1.8" distance="12"></a-light>
+      <a-light type="point" position="0 3 -4" color="#ffd9b3" intensity="1.4" distance="15"></a-light>
+
+      <a-camera fov="50" position="0 1.6 0"></a-camera>
+      <a-plane color="#d9d9d9" rotation="-90 0 0" width="8" height="8" shadow="receive: true"></a-plane>
+      <a-sky color="lightblue"></a-sky>
+      <a-entity camera look-controls wasd-controls
+position="0 1.6 0">
+<a-cursor color="#26A9CB"></a-cursor>
+</a-entity>
     </a-scene>
   </body>
 </html>

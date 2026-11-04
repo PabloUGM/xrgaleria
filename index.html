@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Proyecto AR clases</title>
     <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/RGBELoader.js"></script>
+   <script>
+      AFRAME.registerComponent('room-interior-hdri', {
+        init: function () {
+          const scene = this.el;
+
+          new THREE.RGBELoader().load(
+            'assets/hotel_room_1k.hdr',
+            (texture) => {
+              texture.colorSpace = THREE.LinearSRGBColorSpace;
+              texture.mapping = THREE.EquirectangularReflectionMapping;
+              scene.object3D.background = null;
+              scene.object3D.environment = texture;
+              scene.object3D.environmentIntensity = 0.3;
+            },
+            undefined,
+            (error) => console.error('No se pudo cargar el HDRI de la habitación:', error)
+          );
+        }
+      });
+    </script> 
     <style>
       .ui {
         font-family: Arial, Helvetica, sans-serif;
@@ -17,41 +39,44 @@
         background-color: rgba(255, 255, 255, 0.8);
         padding: 20px;
         text-align: center;
-      }
+    }
     </style>
   </head>
   <body>
     <div class="ui">
       <div class="info">Espacio asignado para la ui</div>
       <button id="rotation-button" type="button" onclick="toggleRotation()">Iniciar rotación</button>
+      <button id="anima" type="button" >Animacion</button>
+
     </div>
-    <a-scene stats="true" shadow="type: pcf">
+    <a-scene stats="true" shadow="type: pcf" room-interior-hdri>
       <a-assets>
-         <a-asset-item id="perso" src="assets/perso.glb"></a-asset-item>
-         <audio id="sonido" src="assets/brillo.mp3"></audio>
+         <a-asset-item id="perso" src="assets/modeloanimado.glb"></a-asset-item>
+         <!-- <audio id="sonido" src="assets/brillo.mp3"></audio> -->
       </a-assets>
 <!-- OBJETOS EN ESCENA -->
       <a-entity id="objetos">
         <a-entity id="modelo" gltf-model="#perso" 
                   position="0 0 -2" 
                   scale="2 2 2" 
+                  animation-mixer="clip: idle; loop: repeat; timeScale: 2"
                   shadow="cast: true; receive: true" 
-                  animation__rotation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 4000; easing: linear; loop: true; startEvents: rotation-start; pauseEvents: rotation-pause; resumeEvents: rotation-resume" 
+                  animation__rotation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 6000; easing: linear; loop: true; startEvents: rotation-start; pauseEvents: rotation-pause; resumeEvents: rotation-resume" 
                   sound="src: #sonido; on: rotation-start; positional: true" >
         </a-entity>
       </a-entity>
 
       <a-text value="Test iluminación"  font="https://cdn.aframe.io/fonts/mozillavr.fnt" position="0 3 -4" align="center" width="4" color="#222D62"></a-text>
 <!-- LUCES -->
-      <a-light type="directional" 
+       <a-light type="directional" 
                position="10 15 5" 
                color="white" 
-               intensity="2" 
+               intensity="1" 
                light="castShadow: true; shadowBias: -0.0001" 
                shadow-camera-automatic="#objetos">
-      </a-light>
-      <a-light type="ambient"  color="white" intensity="2" ></a-light>
-      <a-light type="point" position="0 3 -4" color="#ffd9b3" intensity="1.4" distance="15"></a-light>
+      </a-light> 
+      <a-light type="ambient"  color="white" intensity="1.5" ></a-light> 
+       <a-light type="point" position="0 3 -4" color="#ffd9b3" intensity="1.4" distance="15"></a-light> 
 <!-- ESCENA -->
       <a-camera fov="50" position="0 1.2 2"></a-camera>
       <a-plane color="#d9d9d9" rotation="-90 0 0" width="8" height="8" shadow="receive: true"></a-plane>
@@ -60,6 +85,7 @@
       <a-entity camera look-controls wasd-controls position="0 1 0">
       </a-entity>
     </a-scene>
+    <!-- CONTROLES DE UI -->
     <script>
       let rotationStarted = false;
       let rotationRunning = false;

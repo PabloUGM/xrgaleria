@@ -31,25 +31,42 @@
       .ui {
         font-family: Arial, Helvetica, sans-serif;
         position: absolute;
-        bottom: 0px;
+        bottom: 0;
+        left: 0;
         color: rgb(216, 25, 105);
-        font-size: 20px;
         width: 100%;
         z-index: 9999;
         background-color: rgba(255, 255, 255, 0.8);
         padding: 20px;
         text-align: center;
+        box-sizing: border-box;
+    }
+    .ui button {
+        font-size: 16px;
+        padding: 15px 20px;
+        margin: 5px;
+        border-radius: 25px;
+        border: none;
+        background-color: rgb(51, 43, 47);
+        color: white;
+        cursor: pointer;
     }
     </style>
   </head>
   <body>
-    <div class="ui">
-      <div class="info">Espacio asignado para la ui</div>
+    <div id="ui" class="ui">
+      <div id="ar-status" class="info" aria-live="polite">Presiona «Iniciar AR» y apunta a una superficie plana para colocar el personaje.</div>
+      <button id="ar-button" type="button">Iniciar AR</button>
       <button id="rotation-button" type="button" onclick="toggleRotation()">Iniciar rotación</button>
-      <button id="anima" type="button" >Animacion</button>
+      <button id="anima" type="button">Animación</button>
 
     </div>
-    <a-scene stats="true" shadow="type: pcf" room-interior-hdri>
+    <a-scene
+      shadow="type: pcf"
+      room-interior-hdri
+      xr-mode-ui="enabled: false"
+      webxr="optionalFeatures: hit-test, anchors, dom-overlay; overlayElement: #ui"
+      ar-hit-test="target: #modelo">
       <a-assets>
          <a-asset-item id="perso" src="assets/modeloanimado.glb"></a-asset-item>
          <!-- <audio id="sonido" src="assets/brillo.mp3"></audio> -->
@@ -60,13 +77,14 @@
                   position="0 0 -2" 
                   scale="2 2 2" 
                   animation-mixer="clip: idle; loop: repeat; timeScale: 2"
+                  hide-on-enter-ar
                   shadow="cast: true; receive: true" 
                   animation__rotation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 6000; easing: linear; loop: true; startEvents: rotation-start; pauseEvents: rotation-pause; resumeEvents: rotation-resume" 
                   sound="src: #sonido; on: rotation-start; positional: true" >
         </a-entity>
       </a-entity>
 
-      <a-text value="Test iluminación"  font="https://cdn.aframe.io/fonts/mozillavr.fnt" position="0 3 -4" align="center" width="4" color="#222D62"></a-text>
+      <a-text value="Test iluminación"  font="https://cdn.aframe.io/fonts/mozillavr.fnt" position="0 3 -4" align="center" width="4" color="#222D62" hide-on-enter-ar></a-text>
 <!-- LUCES -->
        <a-light type="directional" 
                position="10 15 5" 
@@ -78,15 +96,68 @@
       <a-light type="ambient"  color="white" intensity="1.5" ></a-light> 
        <a-light type="point" position="0 3 -4" color="#ffd9b3" intensity="1.4" distance="15"></a-light> 
 <!-- ESCENA -->
-      <a-camera fov="50" position="0 1.2 2"></a-camera>
-      <a-plane color="#d9d9d9" rotation="-90 0 0" width="8" height="8" shadow="receive: true"></a-plane>
-      <a-sky color="lightblue"></a-sky>
-<!-- CONTROLES  -->
-      <a-entity camera look-controls wasd-controls position="0 1 0">
-      </a-entity>
+      <a-camera fov="50" position="0 1.2 2" wasd-controls></a-camera>
+      <a-plane color="#d9d9d9" rotation="-90 0 0" width="8" height="8" shadow="receive: true" hide-on-enter-ar></a-plane>
+      <a-sky color="lightblue" hide-on-enter-ar></a-sky>
     </a-scene>
     <!-- CONTROLES DE UI -->
     <script>
+      const scene = document.querySelector('a-scene');
+      const arStatus = document.querySelector('#ar-status');
+      const arButton = document.querySelector('#ar-button');
+
+      arButton.addEventListener('click', async () => {
+        if (scene.is('ar-mode')) {
+          try {
+            await scene.exitVR();
+          } catch (error) {
+            console.error('No se pudo salir del modo AR:', error);
+            arStatus.textContent = 'No se pudo salir del modo AR.';
+          }
+          return;
+        }
+
+        if (!navigator.xr) {
+          arStatus.textContent = 'AR no está disponible. Abre esta experiencia en un navegador compatible y mediante HTTPS.';
+          return;
+        }
+
+        arButton.disabled = true;
+        arStatus.textContent = 'Iniciando AR…';
+        try {
+          await scene.enterVR(true);
+        } catch (error) {
+          console.error('No se pudo iniciar el modo AR:', error);
+          arStatus.textContent = 'No se pudo iniciar AR. Comprueba los permisos y que el dispositivo sea compatible.';
+          arButton.disabled = false;
+        }
+      });
+
+      scene.addEventListener('enter-vr', () => {
+        if (!scene.is('ar-mode')) {
+          arStatus.textContent = 'Este dispositivo inició VR, pero no admite el modo AR requerido.';
+          arButton.disabled = false;
+          return;
+        }
+        arButton.textContent = 'Salir de AR';
+        arButton.disabled = false;
+        arStatus.textContent = 'Apunta a una superficie plana y toca el lugar donde quieres colocar el personaje.';
+      });
+
+      scene.addEventListener('ar-hit-test-achieved', () => {
+        arStatus.textContent = 'Superficie detectada. Toca para colocar el personaje.';
+      });
+
+      scene.addEventListener('ar-hit-test-select', () => {
+        arStatus.textContent = 'Personaje colocado. Puedes iniciar la rotación cuando quieras.';
+      });
+
+      scene.addEventListener('exit-vr', () => {
+        arButton.textContent = 'Iniciar AR';
+        arButton.disabled = false;
+        arStatus.textContent = 'Presiona «Iniciar AR» y apunta a una superficie plana para colocar el personaje.';
+      });
+
       let rotationStarted = false;
       let rotationRunning = false;
 

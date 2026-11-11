@@ -28,24 +28,32 @@
       });
     </script> 
     <style>
-      .ui {
-        font-family: Arial, Helvetica, sans-serif;
+      #ui {
         position: fixed;
-        bottom: 0;
+        inset: 0;
+        z-index: 9999;
+        pointer-events: none;
+      }
+      .ui-panel {
+        font-family: Arial, Helvetica, sans-serif;
+        position: absolute;
+        bottom: env(safe-area-inset-bottom, 0px);
         left: 0;
         color: rgb(216, 25, 105);
         width: 100%;
-        z-index: 9999;
         background-color: rgba(255, 255, 255, 0.8);
         padding: 20px;
         text-align: center;
         box-sizing: border-box;
-    }
-    #ui.a-dom-overlay {
-        inset: auto 0 0;
         pointer-events: auto;
     }
-    .ui button {
+    #ui.a-dom-overlay {
+        position: absolute;
+        inset: 0;
+        padding: 0;
+        pointer-events: none;
+    }
+    .ui-panel button {
         font-size: 16px;
         padding: 15px 20px;
         margin: 5px;
@@ -58,12 +66,13 @@
     </style>
   </head>
   <body>
-    <div id="ui" class="ui">
-      <div id="ar-status" class="info" aria-live="polite">Presiona «Iniciar AR» y apunta a una superficie plana para colocar el personaje.</div>
-      <button id="ar-button" type="button">Iniciar AR</button>
-      <button id="rotation-button" type="button" onclick="toggleRotation()">Iniciar rotación</button>
-      <button id="anima" type="button">Animación</button>
-
+    <div id="ui">
+      <div class="ui-panel">
+        <div id="ar-status" class="info" aria-live="polite">Presiona «Iniciar AR» y apunta a una superficie plana para colocar el personaje.</div>
+        <button id="ar-button" type="button">Iniciar AR</button>
+        <button id="rotation-button" type="button" onclick="toggleRotation()">Iniciar rotación</button>
+        <button id="anima" type="button">Animación</button>
+      </div>
     </div>
     <a-scene
       shadow="type: pcf"

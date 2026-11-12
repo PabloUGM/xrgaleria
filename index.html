@@ -6,79 +6,30 @@
     <title>Proyecto AR clases</title>
     <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/RGBELoader.js"></script>
-   <script>
-      AFRAME.registerComponent('room-interior-hdri', {
-        init: function () {
-          const scene = this.el;
-
-          new THREE.RGBELoader().load(
-            'assets/hotel_room_1k.hdr',
-            (texture) => {
-              texture.colorSpace = THREE.LinearSRGBColorSpace;
-              texture.mapping = THREE.EquirectangularReflectionMapping;
-              scene.object3D.background = null;
-              scene.object3D.environment = texture;
-              scene.object3D.environmentIntensity = 0.3;
-            },
-            undefined,
-            (error) => console.error('No se pudo cargar el HDRI de la habitación:', error)
-          );
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./assets/aframe-three-bridge.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
         }
-      });
-    </script> 
-    <style>
-      #ui {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        pointer-events: none;
       }
-      .ui-panel {
-        font-family: Arial, Helvetica, sans-serif;
-        position: absolute;
-        bottom: env(safe-area-inset-bottom, 0px);
-        left: 0;
-        color: rgb(216, 25, 105);
-        width: 100%;
-        background-color: rgba(255, 255, 255, 0.8);
-        padding: 20px;
-        text-align: center;
-        box-sizing: border-box;
-        pointer-events: auto;
-    }
-    #ui.a-dom-overlay {
-        position: absolute;
-        inset: 0;
-        padding: 0;
-        pointer-events: none;
-    }
-    .ui-panel button {
-        font-size: 16px;
-        padding: 15px 20px;
-        margin: 5px;
-        border-radius: 25px;
-        border: none;
-        background-color: rgb(51, 43, 47);
-        color: white;
-        cursor: pointer;
-    }
-    </style>
+    </script>
+    <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
     <div id="ui">
       <div class="ui-panel">
         <div id="ar-status" class="info" aria-live="polite">Presiona «Iniciar AR» y apunta a una superficie plana para colocar el personaje.</div>
         <button id="ar-button" type="button">Iniciar AR</button>
-        <button id="rotation-button" type="button" onclick="toggleRotation()">Iniciar rotación</button>
+        <button id="rotation-button" type="button">Iniciar rotación</button>
         <button id="anima" type="button">Animación</button>
       </div>
     </div>
     <a-scene
       shadow="type: pcf"
-      room-interior-hdri
-      xr-mode-ui="enabled: false"
-      webxr="optionalFeatures: hit-test, anchors, dom-overlay; overlayElement: #ui"
+      renderer="colorManagement: true; antialias: true"
+      room-interior-hdri xr-mode-ui="enabled: false"
+      webxr="requiredFeatures: hit-test, local-floor; optionalFeatures: hit-test, anchors, dom-overlay; overlayElement: #ui"
       ar-hit-test="target: #modelo">
       <a-assets>
          <a-asset-item id="perso" src="assets/modeloanimado.glb"></a-asset-item>
@@ -86,18 +37,30 @@
       </a-assets>
 <!-- OBJETOS EN ESCENA -->
       <a-entity id="objetos">
+        <!-- Sonido pendiente: habilitar cuando se defina y cargue el recurso #sonido. -->
+        <!-- sound="src: #sonido; on: rotation-start; positional: true" -->
         <a-entity id="modelo" gltf-model="#perso" 
                   position="0 0 -2" 
-                  scale="2 2 2" 
+                  scale="1.7 1.7 1.7" 
                   animation-mixer="clip: idle; loop: repeat; timeScale: 2"
                   hide-on-enter-ar
                   shadow="cast: true; receive: true" 
-                  animation__rotation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 6000; easing: linear; loop: true; startEvents: rotation-start; pauseEvents: rotation-pause; resumeEvents: rotation-resume" 
-                  sound="src: #sonido; on: rotation-start; positional: true" >
+                  animation__rotation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 6000; easing: linear; loop: true; startEvents: rotation-start; pauseEvents: rotation-pause; resumeEvents: rotation-resume">
         </a-entity>
       </a-entity>
 
-      <a-text value="Test iluminación"  font="https://cdn.aframe.io/fonts/mozillavr.fnt" position="0 3 -4" align="center" width="4" color="#222D62" hide-on-enter-ar></a-text>
+      <a-ring
+        id="marcador"
+        color="#ff4ea1"
+        radius-inner="0.08"
+        radius-outer="0.12"
+        rotation="-90 0 0"
+        visible="false"
+        material="opacity: 0.9; transparent: true">
+      </a-ring>
+
+      <!-- Texto de prueba de iluminación; no forma parte de la escena actual. -->
+      <!-- <a-text value="Test iluminación" font="https://cdn.aframe.io/fonts/mozillavr.fnt" position="0 3 -4" align="center" width="4" color="#222D62" hide-on-enter-ar></a-text> -->
 <!-- LUCES -->
        <a-light type="directional" 
                position="10 15 5" 
@@ -114,85 +77,6 @@
       <a-sky color="lightblue" hide-on-enter-ar></a-sky>
     </a-scene>
     <!-- CONTROLES DE UI -->
-    <script>
-      const scene = document.querySelector('a-scene');
-      const arStatus = document.querySelector('#ar-status');
-      const arButton = document.querySelector('#ar-button');
-
-      arButton.addEventListener('click', async () => {
-        if (scene.is('ar-mode')) {
-          try {
-            await scene.exitVR();
-          } catch (error) {
-            console.error('No se pudo salir del modo AR:', error);
-            arStatus.textContent = 'No se pudo salir del modo AR.';
-          }
-          return;
-        }
-
-        if (!navigator.xr) {
-          arStatus.textContent = 'AR no está disponible. Abre esta experiencia en un navegador compatible y mediante HTTPS.';
-          return;
-        }
-
-        arButton.disabled = true;
-        arStatus.textContent = 'Iniciando AR…';
-        try {
-          await scene.enterVR(true);
-        } catch (error) {
-          console.error('No se pudo iniciar el modo AR:', error);
-          arStatus.textContent = 'No se pudo iniciar AR. Comprueba los permisos y que el dispositivo sea compatible.';
-          arButton.disabled = false;
-        }
-      });
-
-      scene.addEventListener('enter-vr', () => {
-        if (!scene.is('ar-mode')) {
-          arStatus.textContent = 'Este dispositivo inició VR, pero no admite el modo AR requerido.';
-          arButton.disabled = false;
-          return;
-        }
-        arButton.textContent = 'Salir de AR';
-        arButton.disabled = false;
-        arStatus.textContent = 'Apunta a una superficie plana y toca el lugar donde quieres colocar el personaje.';
-      });
-
-      scene.addEventListener('ar-hit-test-achieved', () => {
-        arStatus.textContent = 'Superficie detectada. Toca para colocar el personaje.';
-      });
-
-      scene.addEventListener('ar-hit-test-select', () => {
-        arStatus.textContent = 'Personaje colocado. Puedes iniciar la rotación cuando quieras.';
-      });
-
-      scene.addEventListener('exit-vr', () => {
-        arButton.textContent = 'Iniciar AR';
-        arButton.disabled = false;
-        arStatus.textContent = 'Presiona «Iniciar AR» y apunta a una superficie plana para colocar el personaje.';
-      });
-
-      let rotationStarted = false;
-      let rotationRunning = false;
-
-      function toggleRotation() {
-        const model = document.querySelector('#modelo');
-        const button = document.querySelector('#rotation-button');
-
-        if (!rotationStarted) {
-          model.emit('rotation-start');
-          rotationStarted = true;
-          rotationRunning = true;
-          button.textContent = 'Detener rotación';
-        } else if (rotationRunning) {
-          model.emit('rotation-pause');
-          rotationRunning = false;
-          button.textContent = 'Reanudar rotación';
-        } else {
-          model.emit('rotation-resume');
-          rotationRunning = true;
-          button.textContent = 'Detener rotación';
-        }
-      }
-    </script>
+    <script type="module" src="./main.js"></script>
   </body>
 </html>

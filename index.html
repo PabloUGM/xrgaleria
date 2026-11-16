@@ -49,7 +49,7 @@
         </a-entity>
       </a-entity>
 
-      <a-entity id="marcador" visible="false">
+      <a-entity id="marcador" ar-pulse-marker visible="false">
         <a-ring
           color="#ff4ea1"
           radius-inner="0.18"
@@ -100,7 +100,8 @@
         height="0.12"
         segments-radial="64"
         material="color: #c4cbd4; roughness: 0.9; metalness: 0.05"
-        shadow="cast: true; receive: true">
+        shadow="cast: true; receive: true"
+        hide-on-enter-ar>
       </a-cylinder>
       <a-sky color="#555b65" hide-on-enter-ar></a-sky>
     </a-scene>

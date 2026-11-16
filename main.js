@@ -33,6 +33,31 @@ AFRAME.registerComponent('rotation-controller', {
   }
 });
 
+AFRAME.registerComponent('ar-pulse-marker', {
+  init: function () {
+    this.surfaceNormal = new AFRAME.THREE.Vector3();
+  },
+
+  tick: function () {
+    const hitTest = this.el.sceneEl.components['ar-hit-test'];
+    const reticle = hitTest?.bboxMesh;
+
+    if (!reticle) return;
+
+    reticle.material.visible = false;
+
+    if (!this.el.sceneEl.is('ar-mode') || !reticle.visible) {
+      this.el.object3D.visible = false;
+      return;
+    }
+
+    this.surfaceNormal.set(0, 1, 0).applyQuaternion(reticle.quaternion);
+    this.el.object3D.position.copy(reticle.position).addScaledVector(this.surfaceNormal, 0.01);
+    this.el.object3D.quaternion.copy(reticle.quaternion);
+    this.el.object3D.visible = true;
+  }
+});
+
 const scene = document.querySelector('a-scene');
 const ui = document.querySelector('#ui');
 const uiPanel = document.querySelector('.ui-panel');
@@ -49,8 +74,9 @@ ui.addEventListener('beforexrselect', (event) => {
   event.preventDefault();
 });
 
-function showARStatus(message) {
+function showARStatus(message, isLoading = false) {
   arStatus.textContent = message;
+  arStatus.classList.toggle('is-loading', isLoading);
   arStatus.hidden = false;
 }
 
@@ -101,7 +127,7 @@ arButton.addEventListener('click', async () => {
   }
 
   arButton.disabled = true;
-  arStatus.textContent = 'Iniciando AR…';
+  showARStatus('Iniciando AR…', true);
 
   try {
     await scene.enterVR(true);
@@ -122,17 +148,15 @@ scene.addEventListener('enter-vr', () => {
   arButton.textContent = 'Salir de AR';
   arButton.disabled = false;
   plataforma.setAttribute('visible', false);
-  showARStatus('Apunta a una superficie plana y toca el lugar donde quieres colocar el personaje.');
+  marcador.setAttribute('visible', false);
+  showARStatus('Buscando superficies… mueve el teléfono lentamente.', true);
 });
 
-scene.addEventListener('ar-hit-test-achieved', (event) => {
-  const position = event.detail?.position;
+scene.addEventListener('ar-hit-test-start', () => {
+  showARStatus('Buscando superficies… mueve el teléfono lentamente.', true);
+});
 
-  if (position) {
-    marcador.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
-    marcador.setAttribute('visible', true);
-  }
-
+scene.addEventListener('ar-hit-test-achieved', () => {
   showARStatus('Superficie detectada. Toca para colocar el personaje.');
 });
 
@@ -141,12 +165,10 @@ scene.addEventListener('ar-hit-test-select', (event) => {
 
   if (position) {
     modelo.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
-    plataforma.setAttribute('position', `${position.x} ${position.y - 0.06} ${position.z}`);
-    plataforma.setAttribute('visible', true);
     marcador.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
-    marcador.setAttribute('visible', false);
   }
 
+  marcador.setAttribute('visible', false);
   showARStatus('Personaje colocado. Puedes iniciar la rotación cuando quieras.');
   rotationButton.hidden = false;
   animationButton.hidden = false;
@@ -158,6 +180,7 @@ scene.addEventListener('exit-vr', () => {
   arButton.disabled = false;
   plataforma.setAttribute('position', '0 -0.06 -2');
   plataforma.setAttribute('visible', true);
+  marcador.setAttribute('visible', false);
   rotationButton.hidden = !arSupported;
   animationButton.hidden = !arSupported;
   uiPanel.classList.add('is-start-screen');

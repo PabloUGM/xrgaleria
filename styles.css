@@ -53,6 +53,25 @@
   text-align: left;
 }
 
+#ar-status.is-loading::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 9px;
+  border: 2px solid rgba(226, 232, 240, 0.35);
+  border-top-color: #f472b6;
+  border-radius: 50%;
+  vertical-align: -2px;
+  animation: ar-loading-spin 800ms linear infinite;
+}
+
+@keyframes ar-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .ui-panel button {
   width: 100%;
   min-height: 50px;
@@ -126,5 +145,9 @@
 @media (prefers-reduced-motion: reduce) {
   .ui-panel button {
     transition: none;
+  }
+
+  #ar-status.is-loading::before {
+    animation: none;
   }
 }

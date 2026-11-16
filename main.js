@@ -58,6 +58,28 @@ AFRAME.registerComponent('ar-pulse-marker', {
   }
 });
 
+AFRAME.registerComponent('ar-shadow-catcher', {
+  init: function () {
+    const shadowMaterial = new AFRAME.THREE.ShadowMaterial({
+      color: 0x000000,
+      opacity: 0.38,
+      depthWrite: false
+    });
+    this.shadowMesh = new AFRAME.THREE.Mesh(
+      new AFRAME.THREE.PlaneGeometry(3, 3),
+      shadowMaterial
+    );
+    this.shadowMesh.rotation.x = -Math.PI / 2;
+    this.shadowMesh.receiveShadow = true;
+    this.el.object3D.add(this.shadowMesh);
+  },
+
+  remove: function () {
+    this.shadowMesh.geometry.dispose();
+    this.shadowMesh.material.dispose();
+  }
+});
+
 const scene = document.querySelector('a-scene');
 const ui = document.querySelector('#ui');
 const uiPanel = document.querySelector('.ui-panel');
@@ -68,6 +90,8 @@ const marcador = document.querySelector('#marcador');
 const modelo = document.querySelector('#modelo');
 const animationButton = document.querySelector('#anima');
 const plataforma = document.querySelector('#plataforma');
+const shadowCatcher = document.querySelector('#ar-shadow-catcher');
+const surfaceNormal = new AFRAME.THREE.Vector3();
 let arSupported = false;
 
 ui.addEventListener('beforexrselect', (event) => {
@@ -148,6 +172,7 @@ scene.addEventListener('enter-vr', () => {
   arButton.textContent = 'Salir de AR';
   arButton.disabled = false;
   plataforma.setAttribute('visible', false);
+  shadowCatcher.setAttribute('visible', false);
   marcador.setAttribute('visible', false);
   showARStatus('Buscando superficies… mueve el teléfono lentamente.', true);
 });
@@ -168,6 +193,12 @@ scene.addEventListener('ar-hit-test-select', (event) => {
     marcador.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
   }
 
+  surfaceNormal.set(0, 1, 0).applyQuaternion(marcador.object3D.quaternion);
+  shadowCatcher.object3D.position
+    .copy(marcador.object3D.position)
+    .addScaledVector(surfaceNormal, 0.005);
+  shadowCatcher.object3D.quaternion.copy(marcador.object3D.quaternion);
+  shadowCatcher.setAttribute('visible', true);
   marcador.setAttribute('visible', false);
   showARStatus('Personaje colocado. Puedes iniciar la rotación cuando quieras.');
   rotationButton.hidden = false;
@@ -180,6 +211,7 @@ scene.addEventListener('exit-vr', () => {
   arButton.disabled = false;
   plataforma.setAttribute('position', '0 -0.06 -2');
   plataforma.setAttribute('visible', true);
+  shadowCatcher.setAttribute('visible', false);
   marcador.setAttribute('visible', false);
   rotationButton.hidden = !arSupported;
   animationButton.hidden = !arSupported;

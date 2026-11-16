@@ -78,6 +78,7 @@
           animation__fade="property: material.opacity; from: 0.9; to: 0; dur: 1800; easing: linear; loop: true; delay: 1200">
         </a-ring>
       </a-entity>
+      <a-entity id="ar-shadow-catcher" ar-shadow-catcher visible="false"></a-entity>
 
       <!-- Texto de prueba de iluminación; no forma parte de la escena actual. -->
       <!-- <a-text value="Test iluminación" font="https://cdn.aframe.io/fonts/mozillavr.fnt" position="0 3 -4" align="center" width="4" color="#222D62" hide-on-enter-ar></a-text> -->
@@ -96,10 +97,10 @@
       <a-cylinder
         id="plataforma"
         position="0 -0.06 -2"
-        radius="1.45"
+        radius="1.25"
         height="0.12"
         segments-radial="64"
-        material="color: #c4cbd4; roughness: 0.9; metalness: 0.05"
+        material="color: #555b65; roughness: 0.9; metalness: 0.05"
         shadow="cast: true; receive: true"
         hide-on-enter-ar>
       </a-cylinder>

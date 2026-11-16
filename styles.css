@@ -12,9 +12,9 @@
   bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
   transform: translateX(-50%);
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  width: min(720px, calc(100vw - 32px));
+  width: min(560px, calc(100vw - 32px));
   box-sizing: border-box;
   padding: 16px;
   color: #f8fafc;
@@ -29,7 +29,7 @@
 }
 
 .ui-panel.is-start-screen {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   width: min(440px, calc(100vw - 32px));
 }
 
@@ -70,6 +70,7 @@
 }
 
 #ar-button {
+  grid-column: 1 / -1;
   border-color: transparent;
   background: linear-gradient(135deg, #db2777, #be185d);
   box-shadow: 0 7px 18px rgba(190, 24, 93, 0.25);
@@ -108,10 +109,6 @@
     width: calc(100vw - 24px);
     padding: 14px;
     border-radius: 18px;
-  }
-
-  #ar-button {
-    grid-column: 1 / -1;
   }
 
   #ar-status {

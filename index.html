@@ -22,7 +22,7 @@
         <div id="ar-status" class="info" aria-live="polite" hidden></div>
         <button id="ar-button" type="button" disabled>Comprobando AR…</button>
         <button id="rotation-button" type="button" hidden>Iniciar rotación</button>
-        <button id="anima" type="button" hidden>Cambiar a: Box 02</button>
+        <button id="anima" type="button" hidden>Cambiar animación</button>
       </div>
     </div>
     <a-scene
@@ -43,21 +43,41 @@
                   position="0 0 -2" 
                   scale="1.7 1.7 1.7" 
                   animation-mixer="clip: look_around; loop: repeat; timeScale: 1; crossFadeDuration: 0.3"
+                  rotation-controller="speed: 60"
                   hide-on-enter-ar
-                  shadow="cast: true; receive: true" 
-                  animation__rotation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 6000; easing: linear; loop: true; startEvents: rotation-start; pauseEvents: rotation-pause; resumeEvents: rotation-resume">
+                  shadow="cast: true; receive: true">
         </a-entity>
       </a-entity>
 
-      <a-ring
-        id="marcador"
-        color="#ff4ea1"
-        radius-inner="0.08"
-        radius-outer="0.12"
-        rotation="-90 0 0"
-        visible="false"
-        material="opacity: 0.9; transparent: true">
-      </a-ring>
+      <a-entity id="marcador" visible="false">
+        <a-ring
+          color="#ff4ea1"
+          radius-inner="0.18"
+          radius-outer="0.22"
+          rotation="-90 0 0"
+          material="opacity: 0.9; transparent: true; side: double"
+          animation__scale="property: scale; from: 0.2 0.2 0.2; to: 2.8 2.8 2.8; dur: 1800; easing: linear; loop: true"
+          animation__fade="property: material.opacity; from: 0.9; to: 0; dur: 1800; easing: linear; loop: true">
+        </a-ring>
+        <a-ring
+          color="#ff4ea1"
+          radius-inner="0.18"
+          radius-outer="0.22"
+          rotation="-90 0 0"
+          material="opacity: 0.9; transparent: true; side: double"
+          animation__scale="property: scale; from: 0.2 0.2 0.2; to: 2.8 2.8 2.8; dur: 1800; easing: linear; loop: true; delay: 600"
+          animation__fade="property: material.opacity; from: 0.9; to: 0; dur: 1800; easing: linear; loop: true; delay: 600">
+        </a-ring>
+        <a-ring
+          color="#ff4ea1"
+          radius-inner="0.18"
+          radius-outer="0.22"
+          rotation="-90 0 0"
+          material="opacity: 0.9; transparent: true; side: double"
+          animation__scale="property: scale; from: 0.2 0.2 0.2; to: 2.8 2.8 2.8; dur: 1800; easing: linear; loop: true; delay: 1200"
+          animation__fade="property: material.opacity; from: 0.9; to: 0; dur: 1800; easing: linear; loop: true; delay: 1200">
+        </a-ring>
+      </a-entity>
 
       <!-- Texto de prueba de iluminación; no forma parte de la escena actual. -->
       <!-- <a-text value="Test iluminación" font="https://cdn.aframe.io/fonts/mozillavr.fnt" position="0 3 -4" align="center" width="4" color="#222D62" hide-on-enter-ar></a-text> -->
@@ -73,10 +93,16 @@
        <a-light type="point" position="0 3 -4" color="#ffd9b3" intensity="1.4" distance="15"></a-light> 
 <!-- ESCENA -->
       <a-camera fov="50" position="0 1.2 2" wasd-controls></a-camera>
-      <a-entity id="grid-floor" position="0 0.01 0" rotation="-90 0 0" hide-on-enter-ar>
-        <a-plane color="#d8dbe0" width="8" height="8" shadow="receive: true"></a-plane>
-      </a-entity>
-      <a-sky color="#9299a3" hide-on-enter-ar></a-sky>
+      <a-cylinder
+        id="plataforma"
+        position="0 -0.06 -2"
+        radius="1.45"
+        height="0.12"
+        segments-radial="64"
+        material="color: #c4cbd4; roughness: 0.9; metalness: 0.05"
+        shadow="cast: true; receive: true">
+      </a-cylinder>
+      <a-sky color="#555b65" hide-on-enter-ar></a-sky>
     </a-scene>
     <!-- CONTROLES DE UI -->
     <script type="module" src="./main.js"></script>

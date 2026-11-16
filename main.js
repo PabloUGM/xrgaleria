@@ -19,6 +19,20 @@ AFRAME.registerComponent('room-interior-hdri', {
   }
 });
 
+AFRAME.registerComponent('rotation-controller', {
+  schema: {
+    active: { default: false },
+    speed: { default: 60 }
+  },
+
+  tick: function (_time, delta) {
+    if (!this.data.active || !delta) return;
+
+    const elapsed = Math.min(delta, 100) / 1000;
+    this.el.object3D.rotateY((this.data.speed * elapsed * Math.PI) / 180);
+  }
+});
+
 const scene = document.querySelector('a-scene');
 const ui = document.querySelector('#ui');
 const uiPanel = document.querySelector('.ui-panel');
@@ -28,29 +42,12 @@ const rotationButton = document.querySelector('#rotation-button');
 const marcador = document.querySelector('#marcador');
 const modelo = document.querySelector('#modelo');
 const animationButton = document.querySelector('#anima');
-const gridFloor = document.querySelector('#grid-floor');
+const plataforma = document.querySelector('#plataforma');
 let arSupported = false;
 
 ui.addEventListener('beforexrselect', (event) => {
   event.preventDefault();
 });
-
-const gridSize = 8;
-const gridDivisions = 16;
-
-for (let index = 0; index <= gridDivisions; index += 1) {
-  const coordinate = -gridSize / 2 + (gridSize / gridDivisions) * index;
-  const color = index % 4 === 0 ? '#9299a3' : '#aeb4bd';
-
-  addGridLine(`${coordinate} ${-gridSize / 2} 0.01`, `${coordinate} ${gridSize / 2} 0.01`, color);
-  addGridLine(`${-gridSize / 2} ${coordinate} 0.01`, `${gridSize / 2} ${coordinate} 0.01`, color);
-}
-
-function addGridLine(start, end, color) {
-  const line = document.createElement('a-entity');
-  line.setAttribute('line', { start, end, color });
-  gridFloor.appendChild(line);
-}
 
 function showARStatus(message) {
   arStatus.textContent = message;
@@ -81,6 +78,8 @@ async function checkARSupport() {
 
   arButton.disabled = false;
   arButton.textContent = 'Iniciar AR';
+  rotationButton.hidden = false;
+  animationButton.hidden = false;
 }
 
 checkARSupport();
@@ -122,6 +121,7 @@ scene.addEventListener('enter-vr', () => {
 
   arButton.textContent = 'Salir de AR';
   arButton.disabled = false;
+  plataforma.setAttribute('visible', false);
   showARStatus('Apunta a una superficie plana y toca el lugar donde quieres colocar el personaje.');
 });
 
@@ -141,6 +141,8 @@ scene.addEventListener('ar-hit-test-select', (event) => {
 
   if (position) {
     modelo.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+    plataforma.setAttribute('position', `${position.x} ${position.y - 0.06} ${position.z}`);
+    plataforma.setAttribute('visible', true);
     marcador.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
     marcador.setAttribute('visible', false);
   }
@@ -154,8 +156,10 @@ scene.addEventListener('ar-hit-test-select', (event) => {
 scene.addEventListener('exit-vr', () => {
   arButton.textContent = 'Iniciar AR';
   arButton.disabled = false;
-  rotationButton.hidden = true;
-  animationButton.hidden = true;
+  plataforma.setAttribute('position', '0 -0.06 -2');
+  plataforma.setAttribute('visible', true);
+  rotationButton.hidden = !arSupported;
+  animationButton.hidden = !arSupported;
   uiPanel.classList.add('is-start-screen');
   arStatus.hidden = arSupported;
 });
@@ -164,19 +168,17 @@ let rotationStarted = false;
 let rotationRunning = false;
 
 function toggleRotation() {
-  const model = document.querySelector('#modelo');
-
   if (!rotationStarted) {
-    model.emit('rotation-start');
+    modelo.setAttribute('rotation-controller', 'active', true);
     rotationStarted = true;
     rotationRunning = true;
     rotationButton.textContent = 'Detener rotación';
   } else if (rotationRunning) {
-    model.emit('rotation-pause');
+    modelo.setAttribute('rotation-controller', 'active', false);
     rotationRunning = false;
     rotationButton.textContent = 'Reanudar rotación';
   } else {
-    model.emit('rotation-resume');
+    modelo.setAttribute('rotation-controller', 'active', true);
     rotationRunning = true;
     rotationButton.textContent = 'Detener rotación';
   }
@@ -194,7 +196,6 @@ animationButton.addEventListener('click', () => {
   secondaryAction?.stop();
   currentAnimation = 'box_02';
   animationButton.disabled = true;
-  animationButton.textContent = 'Reproduciendo: Box 02…';
   modelo.setAttribute('animation-mixer', 'loop', 'once');
   modelo.setAttribute('animation-mixer', 'clampWhenFinished', true);
   modelo.setAttribute('animation-mixer', 'clip', currentAnimation);
@@ -209,5 +210,5 @@ modelo.addEventListener('animation-finished', (event) => {
   modelo.setAttribute('animation-mixer', 'clampWhenFinished', false);
   modelo.setAttribute('animation-mixer', 'clip', currentAnimation);
   animationButton.disabled = false;
-  animationButton.textContent = 'Cambiar a: Box 02';
+  animationButton.textContent = 'Cambiar animación';
 });

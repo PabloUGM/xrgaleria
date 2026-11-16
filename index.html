@@ -19,10 +19,14 @@
   <body>
     <div id="ui">
       <div class="ui-panel">
+        <div class="panel-heading">
+          <h1 class="panel-title">Galería XR</h1>
+          <span class="panel-tag">CONTROLES AR</span>
+        </div>
         <div id="ar-status" class="info" aria-live="polite">Presiona «Iniciar AR» y apunta a una superficie plana para colocar el personaje.</div>
         <button id="ar-button" type="button">Iniciar AR</button>
         <button id="rotation-button" type="button">Iniciar rotación</button>
-        <button id="anima" type="button">Animación</button>
+        <button id="anima" type="button">Cambiar a: Box 02</button>
       </div>
     </div>
     <a-scene
@@ -32,7 +36,7 @@
       webxr="requiredFeatures: hit-test, local-floor; optionalFeatures: hit-test, anchors, dom-overlay; overlayElement: #ui"
       ar-hit-test="target: #modelo">
       <a-assets>
-         <a-asset-item id="perso" src="assets/modeloanimado.glb"></a-asset-item>
+         <a-asset-item id="perso" src="assets/animacionb.glb"></a-asset-item>
          <!-- <audio id="sonido" src="assets/brillo.mp3"></audio> -->
       </a-assets>
 <!-- OBJETOS EN ESCENA -->
@@ -42,7 +46,7 @@
         <a-entity id="modelo" gltf-model="#perso" 
                   position="0 0 -2" 
                   scale="1.7 1.7 1.7" 
-                  animation-mixer="clip: idle; loop: repeat; timeScale: 2"
+                  animation-mixer="clip: look_around; loop: repeat; timeScale: 1; crossFadeDuration: 0.3"
                   hide-on-enter-ar
                   shadow="cast: true; receive: true" 
                   animation__rotation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 6000; easing: linear; loop: true; startEvents: rotation-start; pauseEvents: rotation-pause; resumeEvents: rotation-resume">

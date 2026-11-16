@@ -25,6 +25,7 @@ const arButton = document.querySelector('#ar-button');
 const rotationButton = document.querySelector('#rotation-button');
 const marcador = document.querySelector('#marcador');
 const modelo = document.querySelector('#modelo');
+const animationButton = document.querySelector('#anima');
 
 arButton.addEventListener('click', async () => {
   if (scene.is('ar-mode')) {
@@ -119,3 +120,30 @@ function toggleRotation() {
 
 rotationButton.addEventListener('click', toggleRotation);
 window.toggleRotation = toggleRotation;
+
+let currentAnimation = 'look_around';
+let secondaryAction;
+
+animationButton.addEventListener('click', () => {
+  if (currentAnimation === 'box_02') return;
+
+  secondaryAction?.stop();
+  currentAnimation = 'box_02';
+  animationButton.disabled = true;
+  animationButton.textContent = 'Reproduciendo: Box 02…';
+  modelo.setAttribute('animation-mixer', 'loop', 'once');
+  modelo.setAttribute('animation-mixer', 'clampWhenFinished', true);
+  modelo.setAttribute('animation-mixer', 'clip', currentAnimation);
+});
+
+modelo.addEventListener('animation-finished', (event) => {
+  if (currentAnimation !== 'box_02') return;
+
+  secondaryAction = event.detail.action;
+  currentAnimation = 'look_around';
+  modelo.setAttribute('animation-mixer', 'loop', 'repeat');
+  modelo.setAttribute('animation-mixer', 'clampWhenFinished', false);
+  modelo.setAttribute('animation-mixer', 'clip', currentAnimation);
+  animationButton.disabled = false;
+  animationButton.textContent = 'Cambiar a: Box 02';
+});

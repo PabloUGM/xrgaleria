@@ -11,7 +11,9 @@ Galería Extendida es una experiencia de realidad aumentada que permite mostrar 
 ## 2 · Cómo se usa
 
 Enlace público de la experiencia (HTTPS): https://pablougm.github.io/xrgaleria/
+
 Dispositivo elegido para el proyecto: Samsung Galaxy S24 (Android).
+
 Recorrido previsto del visitante
 1. Escanear el código QR de la exposición o abrir el enlace público.
 2. Acceder a la experiencia desde el navegador del teléfono.

@@ -41,7 +41,7 @@ Tecnología y recursos
 
 ## 5 · Testing
 
-Video del recorrido: [https://...](https://youtu.be/r1Sr4qK34qs)
+Video del recorrido: [Video grabado de la experincia en el pasillo](https://youtu.be/r1Sr4qK34qs)
 
 ### Abrir el enlace en ventana privada
 - Resultado: Carga sin quedar en blanco.

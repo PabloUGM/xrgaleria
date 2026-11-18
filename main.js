@@ -104,10 +104,17 @@ function showARStatus(message, isLoading = false) {
   arStatus.hidden = false;
 }
 
+function showFallbackControls() {
+  rotationButton.hidden = false;
+  animationButton.hidden = false;
+  uiPanel.classList.remove('is-start-screen');
+}
+
 async function checkARSupport() {
   if (!navigator.xr) {
     arButton.textContent = 'AR no disponible';
     showARStatus('AR no está disponible. Abre esta experiencia en un navegador compatible y mediante HTTPS.');
+    showFallbackControls();
     return;
   }
 
@@ -117,12 +124,14 @@ async function checkARSupport() {
     console.error('No se pudo comprobar la compatibilidad con AR:', error);
     arButton.textContent = 'AR no disponible';
     showARStatus('No se pudo comprobar si este dispositivo admite AR. Recarga la página e inténtalo nuevamente.');
+    showFallbackControls();
     return;
   }
 
   if (!arSupported) {
     arButton.textContent = 'AR no disponible';
     showARStatus('Este dispositivo o navegador no admite experiencias AR.');
+    showFallbackControls();
     return;
   }
 
@@ -213,8 +222,7 @@ scene.addEventListener('exit-vr', () => {
   plataforma.setAttribute('visible', true);
   shadowCatcher.setAttribute('visible', false);
   marcador.setAttribute('visible', false);
-  rotationButton.hidden = !arSupported;
-  animationButton.hidden = !arSupported;
+  showFallbackControls();
   uiPanel.classList.add('is-start-screen');
   arStatus.hidden = arSupported;
 });

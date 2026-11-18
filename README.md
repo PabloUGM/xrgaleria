@@ -78,3 +78,4 @@ Video del recorrido: [Video grabado de la experincia en el pasillo](https://yout
 
 - Incorporacion de una segunda experiencia de AR para la carga de un video animado previamente renderizado en .mp4
 - Lámina para colocar en el lugar donde inicia la experiencia que acompañe al qr como elemento visual.
+- Sonido espacial cuando se acerca al personaje

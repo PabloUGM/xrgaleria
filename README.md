@@ -31,42 +31,48 @@ Tecnología y recursos
 
 ## 4 · Decisiones
 
-- Qué decidí y por qué (luz, sonido, materiales, interacción).
-- Qué cambió respecto de lo que propuse en la Solemne 1, y por qué.
+- Acceso desde el navegador: mantengo la idea de un QR que lleve a una experiencia WebAR, para evitar una instalación adicional.
+- Momento clave: concentro el prototipo en un personaje 3D para probar un comportamiento concreto antes de ampliar la cantidad de obras expuestas.
+- Animación e interacción: utilizo la secuencia Idle → Action → Idle como respuesta sencilla y reconocible al toque del usuario.
+  
+-Cambios respecto de la Solemne 1
+-Desarrollo web - Propuesta inicial era Three.js con WebXR : Se optó por A-Frame 1.8.0 para construir la escena y organizar sus componentes de manera más directa.
+
 
 ## 5 · Testing
 
-Video del recorrido: https://...
+Video del recorrido: [https://...](https://youtu.be/r1Sr4qK34qs)
 
 ### Abrir el enlace en ventana privada
-- Resultado: ...
+- Resultado: Carga sin quedar en blanco.
 - Ajuste que hice: ...
 
 ### Dispositivo elegido
-- Resultado: ...
+- Resultado: Se ve y se maneja correctamente.
 - Ajuste que hice: ...
 
 ### Interacciones, una por una
-- Resultado: ...
-- Ajuste que hice: ...
+- Resultado: Responde según la interacción prevista.
+- Ajuste que hice: Tocar boton animar personaje; comprobar Action y retorno a Idle.
 
 ### Sonido con audífonos
-- Resultado: ...
+- Resultado: No tiene, el audio es el del ambiente
 - Ajuste que hice: ...
 
 ### Fluidez del recorrido
-- Resultado: ...
+- Resultado: No presenta saltos, bloqueos ni pausas importantes.
 - Ajuste que hice: ...
 
 ### Entrar como si fuera la primera vez
-- Resultado: ...
+- Resultado: 	Entrar sin apoyarse en las notas del desarrollo.
 - Ajuste que hice: ...
 
 ## 6 · Uso de IA
 
-- Qué le pedí a la IA (herramienta y para qué).
-- Qué hice yo y qué cambié de lo que me entregó.
+- Se utilizó github copilot como herramienta de apoyo para: Solicitar propuestas de código para cargar un GLB y gestionar la transición entre las animaciones Idle y Action. La animacion secundaria esta hecha con tripo3d
+- El codigo base de la escena esta escrito con los recursos visto en clases. El modelado, textura , rigging y la animacion idle son de mi autoria.
 
 ## 7 · Pendientes para el examen
 
-- Lo que falta, en orden de importancia.
+- Incorporacion de una segunda experiencia de AR para la carga de un video animado previamente renderizado en .mp4
+- Lámina para colocar en el lugar donde inicia la experiencia que acompañe al qr como elemento visual.

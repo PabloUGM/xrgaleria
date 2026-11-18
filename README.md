@@ -1,4 +1,4 @@
-# Nombre de tu escena
+# Galeria Aumentada
 
 Pablo Mardones Cofré - Galeria Aumentada · Realidades Extendidas y Experiencias Inmersivas · UGM · 2026
 
